@@ -2,7 +2,7 @@
 
 A simple static content web server for Node on Linux.
 
-Original code found at (MDN)[https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Node_server_without_framework]
+Original code found at [MDN](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Server-side/Node_server_without_framework)
 
 ## Minor revisions
 
