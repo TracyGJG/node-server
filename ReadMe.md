@@ -7,7 +7,15 @@ Original source code can be found at [MDN](https://developer.mozilla.org/en-US/d
 ## Minor revisions
 
 1. I prepended a shebang `#!/usr/bin/env node` so the js file can be executed directly (`./node-server.js`.)
-2. There is a `static` folder containing simple `index` and `404` html files by way of example content.
-3. An alternative content folder (`public`) is supplied for testing.
-4. An alternative port number can be supplied using the `-P=` switch, but the default will be port `8000`.
-5. An alternative root directory can be supplied using the `-R=` switch, but the default will be `'./static'`.
+2. There is a `static` folder containing simple `index` and `404` html files (and favicon) by way of example content.
+3. An alternative content folder (`public`) is also supplied for testing.
+4. Added Command-line switch processing.
+
+## Command-Line Switches
+
+The switches take the form `-S=V`, where `S` is the switch and `V` is the value (string.)
+
+| Switch | Purpose        | Deault   |
+| ------ | -------------- | -------- |
+| P      | Port number    | 8000     |
+| R      | Roor directory | ./static |
