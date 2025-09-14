@@ -8,5 +8,74 @@
   </head>
   <body>
     <h1>Alternative index</h1>
+    <script type="module">
+      import clientApi from './client-api.js';
+
+      console.clear();
+      const profileApi = clientApi('/api/profile', ({ status, statusText }) => {
+        console.log(`Error (${status}): ${statusText}`);
+      });
+
+      console.groupCollapsed('Read Profile');
+      console.table(await profileApi.read());
+      console.groupEnd('Read Profile');
+
+      const postsApi = clientApi('/api/posts', ({ status, statusText }) => {
+        console.log(`Error (${status}): ${statusText}`);
+      });
+
+      console.groupCollapsed('Read all');
+      console.table(await postsApi.read());
+      console.groupEnd('Read all');
+
+      console.groupCollapsed('Read one');
+      console.table(await postsApi.read('1000000000001'));
+      console.groupEnd('Read one');
+
+      console.groupCollapsed('Create new');
+      const newPost = await postsApi.create({
+        title: 'test title',
+        views: 666,
+      });
+      console.log(newPost);
+      console.table(await postsApi.read());
+      console.groupEnd('Create new');
+
+      console.groupCollapsed('Update existing');
+      const updatedPost = await postsApi.update({
+        id: newPost.id,
+        title: 'The ultimate question',
+        views: 42,
+      });
+      console.log(updatedPost);
+      console.table(await postsApi.read());
+
+      console.log('Delete', newPost.id);
+      await postsApi.delete(newPost.id);
+      console.table(await postsApi.read());
+      console.groupEnd('Update existing');
+
+      console.groupCollapsed('Update new');
+      const addedPost = await postsApi.update({
+        title: 'The ultimate question',
+        views: 42,
+      });
+      console.log(addedPost);
+      console.table(await postsApi.read());
+      console.groupEnd('Update new');
+
+      console.groupCollapsed('Modify and Delete');
+      const modifyPost = await postsApi.modify({
+        id: addedPost.id,
+        title: 'So long and thanks for all the fish',
+      });
+      console.log(modifyPost);
+      console.table(await postsApi.read());
+
+      console.log('Delete', modifyPost.id);
+      await postsApi.delete(modifyPost.id);
+      console.table(await postsApi.read());
+      console.groupEnd('Modify and Delete');
+    </script>
   </body>
 </html>
