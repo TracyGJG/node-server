@@ -1,0 +1,5 @@
+{
+  "API": "./public/api-data.json",
+  "PORT": 12345,
+  "ROOT": "/public"
+}

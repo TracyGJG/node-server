@@ -17,22 +17,31 @@ const MIME_TYPES = {
   svg: 'image/svg+xml',
 };
 
-const { API, PORT, ROOT } = {
-  API: argSwitch('A') || './public/api-data.json',
-  PORT: +(argSwitch('P') || '8000'),
-  ROOT: path.join(process.cwd(), argSwitch('R') || './public'),
-};
+let defaultApi = '';
+let defaultPort = '8000';
+let defaultRoot = '/static';
 
-function argSwitch(sw) {
-  const re = RegExp(`^-${sw}=`, 'i');
-  return process.argv
-    .slice(2)
-    .find((argv) => re.test(argv))
-    ?.slice(3);
+try {
+  const CONFIG = await import('./config.json', { with: { type: 'json' } });
+  defaultApi = CONFIG.default.API;
+  defaultPort = CONFIG.default.PORT;
+  defaultRoot = CONFIG.default.ROOT;
+} catch (err) {
+  console.warn('No configuration file loaded. Default values applied.');
 }
 
-const API_DATA =
-  API && (await import(API, { with: { type: 'json' } }))?.default;
+const { API, PORT, ROOT } = {
+  API: defaultApi,
+  PORT: defaultPort,
+  ROOT: path.join(process.cwd(), defaultRoot),
+};
+
+let API_DATA;
+try {
+  API_DATA = API && (await import(API, { with: { type: 'json' } }))?.default;
+} catch (err) {
+  console.warn(`API data file "${API}" failed to load. Continued with an API.`);
+}
 
 const isApi = (req) =>
   API_DATA &&

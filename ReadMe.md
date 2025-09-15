@@ -2,7 +2,7 @@
 
 A simple static content web server for Node on Linux, extended to support API interaction using my [client-api](https://github.com/TracyGJG/client-api).
 
-N.B. This project is alright for demos, prototypes and testing, but not production. Alternative products include:
+N.B. This project is alright for demos, prototypes and testing, but not production. Alternative products to consider include:
 
 - Mock Service Worker [(MSW)](https://mswjs.io/) - API endpoints
 - [HTTP-Server](https://www.npmjs.com/package/http-server) - Static content server.
@@ -15,14 +15,14 @@ Original source code can be found at [MDN](https://developer.mozilla.org/en-US/d
 1. I prepended a shebang `#!/usr/bin/env node` so the js file can be executed directly (`./node-server.js`.)
 2. There is a `static` folder containing simple `index` and `404` html files (and favicon) by way of example web content.
 3. An alternative (`public`) folder is also supplied for testing with an API interface.
-4. Added Command-line switch processing.
+4. Loading configuration data from an optional `config.json` file
 
-## Command-Line Switches
+## Configuration file values
 
-The switches take the form `-S=V`, where `S` is the switch and `V` is the value (string.)
+The configuration file is in JSON format and contains an object with the following properties.
 
-| Switch | Purpose                   | Deault   |
-| ------ | ------------------------- | -------- |
-| P      | Port number               | 8000     |
-| R      | Root directory            | ./static |
-| A      | Path to the API data file | NONE     |
+| Property | Purpose                   | Deault   |
+| -------- | ------------------------- | -------- |
+| API      | Path to the API data file | NONE     |
+| PORT     | Port number               | 8000     |
+| ROOT     | Root directory            | ./static |
