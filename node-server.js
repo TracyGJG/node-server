@@ -20,7 +20,6 @@ const MIME_TYPES = {
 let defaultApi = '';
 let defaultPort = '8000';
 let defaultRoot = '/static';
-
 try {
   const CONFIG = await import('./config.json', { with: { type: 'json' } });
   defaultApi = CONFIG.default.API;
@@ -50,14 +49,13 @@ const isApi = (req) =>
 
 const getBody = (req, fnCallback) => {
   const data = [];
-  req.on('data', (datum) => {
-    const decoder = new TextDecoder();
-    const _datum = decoder.decode(datum);
-    data.push(_datum);
-  });
-  req.on('end', () => {
-    fnCallback(JSON.parse(data.join('')));
-  });
+  req
+    .on('data', (datum) => {
+      data.push(datum);
+    })
+    .on('end', () => {
+      fnCallback(JSON.parse(Buffer.concat(data).toString()));
+    });
 };
 
 const processApi = async (req, res) => {
@@ -66,20 +64,24 @@ const processApi = async (req, res) => {
 
   if (method === 'POST' && id) {
     res.writeHead(404, { 'Content-Type': MIME_TYPES.html });
-    res.end('Error: Bad Request - Post with Id');
+    res.write('Error: Bad Request - Post with Id');
+    res.end();
     return;
   }
   if (method !== 'GET' && !Array.isArray(API_DATA[resource])) {
     res.writeHead(404, { 'Content-Type': MIME_TYPES.html });
-    res.end('Error: Bad Request - Non-Get on Object resource');
+    res.write('Error: Bad Request - Non-Get on Object resource');
+    res.end();
     return;
   }
+
   if (method === 'GET') {
     const data = id
       ? API_DATA[resource].find((entry) => entry.id === id)
       : API_DATA[resource];
     res.writeHead(200, { 'Content-Type': MIME_TYPES.json });
-    res.end(JSON.stringify(data));
+    res.write(JSON.stringify(data));
+    res.end();
     return;
   }
   if (method === 'DELETE') {
@@ -90,7 +92,6 @@ const processApi = async (req, res) => {
     res.end(JSON.stringify(null));
     return;
   }
-
   if (method[0] === 'P') {
     // Get HTTP.Body for POST (create), PUT (create/update), PATCH (partial)
     getBody(req, (body) => {
@@ -113,7 +114,8 @@ const processApi = async (req, res) => {
         statusCode = 200;
       }
       res.writeHead(statusCode, { 'Content-Type': MIME_TYPES.json });
-      res.end(JSON.stringify(data));
+      res.write(JSON.stringify(data));
+      res.end();
     });
   }
 };
