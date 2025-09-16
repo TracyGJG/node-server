@@ -62,6 +62,7 @@ const processApi = async (req, res) => {
   const [resource, id] = req.url.split(/\//).splice(2);
   const method = req.method;
 
+  // Guard conditions
   if (method === 'POST' && id) {
     res.writeHead(404, { 'Content-Type': MIME_TYPES.html });
     res.write('Error: Bad Request - Post with Id');
@@ -75,6 +76,7 @@ const processApi = async (req, res) => {
     return;
   }
 
+  // Process methods
   if (method === 'GET') {
     const data = id
       ? API_DATA[resource].find((entry) => entry.id === id)
@@ -89,35 +91,39 @@ const processApi = async (req, res) => {
     const statusCode = API_DATA[resource].length === data.length ? 404 : 200;
     API_DATA[resource] = data;
     res.writeHead(statusCode, { 'Content-Type': MIME_TYPES.json });
-    res.end(JSON.stringify(null));
+    res.end(JSON.stringify(statusCode === 200 ? 'Success' : 'Failure'));
     return;
   }
-  if (method[0] === 'P') {
-    // Get HTTP.Body for POST (create), PUT (create/update), PATCH (partial)
-    getBody(req, (body) => {
-      let statusCode = 404;
-      const _id = id || '' + Date.now();
-      const index = API_DATA[resource].findIndex((entry) => entry.id === id);
+  if (method[0] !== 'P') return;
 
-      const data = {
-        ...(id
-          ? API_DATA[resource].find((entry) => entry.id === id)
-          : { id: _id }),
-        ...body,
-      };
-      if (data) {
-        if (method === 'PATCH' || (method === 'PUT' && id)) {
-          API_DATA[resource][index] = data;
-        } else {
-          API_DATA[resource].push(data);
-        }
-        statusCode = 200;
+  // Process POST (create[data]), PUT (create[data]/update[data+id]) & PATCH (partial[id,data])
+  // Get HTTP.Body and process request
+  getBody(req, (body) => {
+    let statusCode = 200;
+    const _id = id || body?.id || '' + Date.now();
+    const datum = API_DATA[resource].find((entry) => entry.id === id);
+    const updatedDatum = { ...datum, ...body, id: _id };
+
+    if (datum) {
+      if (method === 'POST') {
+        statusCode = 409;
+      } else {
+        // PUT/PATCH
+        const index = API_DATA[resource].findIndex((entry) => entry.id === id);
+        API_DATA[resource][index] = updatedDatum;
       }
-      res.writeHead(statusCode, { 'Content-Type': MIME_TYPES.json });
-      res.write(JSON.stringify(data));
-      res.end();
-    });
-  }
+    } else {
+      if (method === 'PATCH') {
+        statusCode = 404;
+      } else {
+        // POST/PUT
+        API_DATA[resource].push(updatedDatum);
+      }
+    }
+    res.writeHead(statusCode, { 'Content-Type': MIME_TYPES.json });
+    res.write(JSON.stringify(updatedDatum));
+    res.end();
+  });
 };
 
 const prepareFile = async ({ url }, res) => {

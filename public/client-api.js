@@ -3,13 +3,10 @@ function clientApi(baseUrl, fnErrorHandler) {
 
   async function issueRequest(url, opts) {
     const response = await fetch(url, opts);
-    if (!response.ok) {
-      return fnErrorHandler({
-        status: response.status,
-        statusText: response.statusText,
-      });
-    }
-    return await response.json();
+    const { status, statusText } = response;
+    return response.ok
+      ? await response.json()
+      : fnErrorHandler({ status, statusText });
   }
 
   return {
@@ -25,15 +22,13 @@ function clientApi(baseUrl, fnErrorHandler) {
       });
     },
     update(data) {
-      const id = data?.id ?? '';
-      return issueRequest(`${BASE_URL}${id}`, {
+      return issueRequest(`${BASE_URL}${data.id ?? ''}`, {
         method: 'PUT',
         body: JSON.stringify(data),
       });
     },
     modify(data) {
-      const id = data.id;
-      return issueRequest(`${BASE_URL}${id}`, {
+      return issueRequest(`${BASE_URL}${data.id ?? ''}`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       });
